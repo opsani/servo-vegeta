@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+
+from measure import Measure, ST_FAILED
+
+import sys
+import os
+import time
+import subprocess
+import json
+import unicodedata
+import string
+import re
+
+from threading import Timer
+
+DESCRIPTION = "Vegeta plugin for the Opsani Continuous Integration Engine"
+VERSION = "0.0.1"
+REPORTING_INTERVAL = 1
+HAS_CANCEL = True
+
+DEFAULT_CONFIGURATION = {
+    'rate': '500',
+    'duration': '0',
+    'targets': 'vegeta_targets',
+    'format': 'http',
+    'connections': '10000',
+    'workers': '10',
+    'max-workers': '18446744073709551615',
+    'http2': 'true',
+    'keepalive': 'true',
+    'insecure': 'false',
+}
+
+METRICS = {
+    'throughput': {
+        'unit': 'requests/second'
+    },
+    'error_rate': {
+        'unit': 'count'
+    },
+    'latency_total': {
+        'unit': 'milliseconds'
+    },
+    'latency_mean': {
+        'unit': 'milliseconds'
+    },
+    'latency_50th': {
+        'unit': 'milliseconds'
+    },
+    'latency_90th': {
+        'unit': 'milliseconds'
+    },
+    'latency_95th': {
+        'unit': 'milliseconds'
+    },
+    'latency_99th': {
+        'unit': 'milliseconds'
+    },
+    'latency_max': {
+        'unit': 'milliseconds'
+    },
+    'latency_min': {
+        'unit': 'milliseconds'
+    },
+}
+
+class Vegeta(Measure):
+
+    def describe(self):
+        return METRICS
+
+    # overwrites super
+    def handle_cancel(self, signal, frame):
+        err = "Exiting due to signal: %s"%signal
+        self.print_measure_error(err, ST_FAILED)
+        try:
+            self.proc.terminate()
+        except:
+            pass
+        sys.exit(3)
+
+    # overwrites super
+    def measure(self):
+        config = DEFAULT_CONFIGURATION.copy()
+        try:
+            load = self.input_data.get('vegeta', {})
+        except:
+            raise Exception('Invalid control configuration format in input')
+
+        config.update(load)
+        result, command, report = self._run_vegeta(config)
+
+        metrics = self._metrics_from_vegeta_report(report)
+        annotations = {
+            'command': command,
+        }
+        return (metrics, annotations)
+
+
+    # helper:  run apache benchmark measurement
+    def _run_vegeta(self, config):
+        prog_coefficient = 1.0
+        prog_start = 0.0
+
+        # construct and run measurement command
+        vegeta_args = [
+            'vegeta', 'attack',
+            '-rate', config['rate'], 
+            '-duration', config['duration'], 
+            '-targets', config['targets'],            
+            '-targets', config['targets'],
+            '-format', config['format'],
+            '-workers', config['workers'],
+            '-max-workers', config['max-workers'],
+            '-http2', config['http2'],
+            '-keepalive', config['keepalive'],
+            '-insecure', config['insecure']
+        ]
+
+        report = self._run_vegeta_progress(vegeta_args, config['duration'], prog_start, prog_coefficient)
+        command = ' '.join(vegeta_args)
+        return (result, command, report)
+
+    # helper:  execute Vegeta command and print progress
+    def _run_vegeta_progress(self, vegeta_attack_cmd, duration, prog_start, prog_coefficient):
+        vegeta_report_cmd = [
+            'vegeta', 'report', 
+            '-type', 'json',
+            '-every', str(REPORTING_INTERVAL) + 's'
+        ]
+        self.debug("Running Vegeta: ", ' '.join(vegeta_attack_cmd), ' | ', ' '.join(vegeta_report_cmd))
+        vegeta_attack_proc = subprocess.Popen(vegeta_attack_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # Pipe the output from the attack process into the reporting process
+        self.proc = subprocess.Popen(vegeta_report_cmd, stdin=vegeta_attack_proc.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # start progress for time limited vegeta command: update every 5 seconds -
+        # it is printed by default every 30 seconds
+        duration_in_seconds = self._seconds_from_duration_str(duration)
+        started_at = time.time()
+        timer = repeatingTimer(REPORTING_INTERVAL, self._update_timed_progress, started_at, duration_in_seconds,
+                            prog_start, prog_coefficient)
+        timer.start()
+
+        # use try-and-finally to ensure the timer, if any, is canceled and does
+        # not block driver exit in case of an exception
+        vegeta_report = {}
+        try:
+            stripped = lambda s: "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
+            while True:
+                output = self.proc.stdout.readline()                
+                if output:
+                    report_output = output.decode().strip()
+                    # TODO: Hack. Why can't I get this crap stripped?
+                    json_string = stripped(report_output).replace('[2J[0;0H', '')
+                    vegeta_report = json.loads(json_string)
+                    self._metrics_from_vegeta_report(vegeta_report)
+                if self.proc.poll() is not None:
+                    # Child process has exited, stop polling
+                    break
+            status_code = self.proc.returncode
+            self.debug("Vegeta exited with status code:", status_code)
+        except Exception as e:
+            raise
+        finally:
+            timer.cancel()
+        return vegeta_report
+
+    # Parses a Golang duration string into seconds
+    def _seconds_from_duration_str(self, duration_value):
+        if duration_value.strip() == '0':
+            return 0
+        hours, minutes, seconds = 0, 0, 0
+        for component in re.findall('\d+[hms]', duration_value):
+            time = component[:-1]
+            unit = component[-1]
+            if unit == 'h': hours = int(time)
+            if unit == 'm': minutes = int(time)
+            if unit == 's': seconds = int(time)
+        total_seconds = (hours * 60 * 60) + (minutes * 60) + seconds
+        return total_seconds
+
+    def _metrics_from_vegeta_report(self, report):
+        self.debug("Emitting metrics from Vegeta report: ", report)
+        return {}
+
+    # helper:  update timer based progress
+    def _update_timed_progress(self, t_start, t_limit, prog_start, prog_coefficient):
+        prog = min(100.0, 100.0 * (time.time() - t_start) / t_limit)
+        self.progress = min(100, int((prog_coefficient * prog) + prog_start))
+
+
+class repeatingTimer():
+    def __init__(self, seconds, func, *args):
+        self.seconds = seconds
+        self.func = func
+        self.args = args
+        self.thread = Timer(self.seconds, self.call_func)
+    def call_func(self):
+        self.func(*self.args)
+        self.thread = Timer(self.seconds, self.call_func)
+        self.thread.start()
+    def start(self):
+        self.thread.start()
+    def cancel(self):
+        self.thread.cancel()
+
+
+if __name__ == '__main__':
+    vegeta = Vegeta(VERSION, DESCRIPTION, HAS_CANCEL, REPORTING_INTERVAL)
+    vegeta.run()
