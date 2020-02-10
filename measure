@@ -201,9 +201,10 @@ class Vegeta(Measure):
 
     # helper:  update timer based progress
     def _update_timed_progress(self, t_start, t_limit, prog_start, prog_coefficient):
-        prog = min(100.0, 100.0 * (time.time() - t_start) / t_limit)
-        self.progress = min(100, int((prog_coefficient * prog) + prog_start))
-
+        # When duration is 0, Vegeta is attacking forever
+        if t_limit:
+            prog = min(100.0, 100.0 * (time.time() - t_start) / t_limit)
+            self.progress = min(100, int((prog_coefficient * prog) + prog_start))
 
 class repeatingTimer():
     def __init__(self, seconds, func, *args):
