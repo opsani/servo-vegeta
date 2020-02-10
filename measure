@@ -181,8 +181,23 @@ class Vegeta(Measure):
         return total_seconds
 
     def _metrics_from_vegeta_report(self, report):
-        self.debug("Emitting metrics from Vegeta report: ", report)
-        return {}
+        metrics = METRICS.copy()
+
+        # Capture latency values
+        for latency_key in ['total', 'mean', '50th', '95th', '99th', 'max', 'min']:
+            latency_value = report['latencies'].get(latency_key, None)
+            # Convert Nanonsecond -> Millisecond
+            value = (latency_value / 1e-6) if latency_value is not None else None
+            metrics['latency_' + latency_key]['value'] = value
+
+        # Capture throughput
+        metrics['throughput']['value'] = report['throughput']
+        
+        # Calculate error rate
+        error_rate = 100 - (report['success'] * 100) # Fraction of success inverted into % of error
+        metrics['error_rate']['value'] = f'{error_rate:.3f}%'
+
+        return metrics
 
     # helper:  update timer based progress
     def _update_timed_progress(self, t_start, t_limit, prog_start, prog_coefficient):
