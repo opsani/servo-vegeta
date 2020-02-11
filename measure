@@ -6,6 +6,7 @@ import sys
 import os
 import time
 import subprocess
+import yaml
 import json
 import unicodedata
 import string
@@ -81,14 +82,11 @@ class Vegeta(Measure):
 
     # overwrites super
     def measure(self):
-        config = DEFAULT_CONFIGURATION.copy()
-        try:
-            load = self.input_data.get('vegeta', {})
-        except:
-            raise Exception('Invalid control configuration format in input')
-
-        config.update(load)
-        exit_code, command, report = self._run_vegeta(config)
+        with open('./config.yaml') as f:
+            config_from_file = yaml.load(f.read())['vegeta']
+        vegeta_config = DEFAULT_CONFIGURATION.copy()
+        vegeta_config.update(config_from_file)
+        exit_code, command, report = self._run_vegeta(vegeta_config)
 
         metrics = self._metrics_from_vegeta_report(report) if report else {}
         annotations = {
