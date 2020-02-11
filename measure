@@ -88,7 +88,7 @@ class Vegeta(Measure):
             raise Exception('Invalid control configuration format in input')
 
         config.update(load)
-        result, command, report = self._run_vegeta(config)
+        exit_code, command, report = self._run_vegeta(config)
 
         metrics = self._metrics_from_vegeta_report(report)
         annotations = {
@@ -96,14 +96,14 @@ class Vegeta(Measure):
         }
         return (metrics, annotations)
 
-
-    # helper:  run apache benchmark measurement
     def _run_vegeta(self, config):
         prog_coefficient = 1.0
         prog_start = 0.0
+        exit_code, vegeta_report = None, None
 
-        # construct and run measurement command
-        vegeta_args = [
+        # construct and run Vegeta command
+        duration = config['duration']
+        vegeta_attack_args = [
             'vegeta', 'attack',
             '-rate', config['rate'], 
             '-duration', config['duration'], 
@@ -117,22 +117,17 @@ class Vegeta(Measure):
             '-insecure', config['insecure']
         ]
 
-        report = self._run_vegeta_progress(vegeta_args, config['duration'], prog_start, prog_coefficient)
-        command = ' '.join(vegeta_args)
-        return (result, command, report)
-
-    # helper:  execute Vegeta command and print progress
-    def _run_vegeta_progress(self, vegeta_attack_cmd, duration, prog_start, prog_coefficient):
-        vegeta_report_cmd = [
+        vegeta_report_args = [
             'vegeta', 'report', 
             '-type', 'json',
             '-every', str(REPORTING_INTERVAL) + 's'
         ]
-        self.debug("Running Vegeta: ", ' '.join(vegeta_attack_cmd), ' | ', ' '.join(vegeta_report_cmd))
-        vegeta_attack_proc = subprocess.Popen(vegeta_attack_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        vegeta_cmd = ' '.join(vegeta_attack_args), ' | ', ' '.join(vegeta_report_args)
+        self.debug("Running Vegeta: ", vegeta_cmd)
+        vegeta_attack_proc = subprocess.Popen(vegeta_attack_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Pipe the output from the attack process into the reporting process
-        self.proc = subprocess.Popen(vegeta_report_cmd, stdin=vegeta_attack_proc.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.proc = subprocess.Popen(vegeta_report_args, stdin=vegeta_attack_proc.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # start progress for time limited vegeta command: update every 5 seconds -
         # it is printed by default every 30 seconds
@@ -142,9 +137,7 @@ class Vegeta(Measure):
                             prog_start, prog_coefficient)
         timer.start()
 
-        # use try-and-finally to ensure the timer, if any, is canceled and does
-        # not block driver exit in case of an exception
-        vegeta_report = {}
+        # loop and poll our process pipe to gather report data        
         try:
             stripped = lambda s: "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
             while True:
@@ -158,13 +151,13 @@ class Vegeta(Measure):
                 if self.proc.poll() is not None:
                     # Child process has exited, stop polling
                     break
-            status_code = self.proc.returncode
+            exit_code = self.proc.returncode
             self.debug("Vegeta exited with status code:", status_code)
         except Exception as e:
             raise
         finally:
             timer.cancel()
-        return vegeta_report
+        return exit_code, vegeta_cmd, vegeta_report
 
     # Parses a Golang duration string into seconds
     def _seconds_from_duration_str(self, duration_value):
@@ -197,6 +190,7 @@ class Vegeta(Measure):
         error_rate = 100 - (report['success'] * 100) # Fraction of success inverted into % of error
         metrics['error_rate']['value'] = f'{error_rate:.3f}%'
 
+        self.debug("Built metrics ", metrics, "\n\n from \n\n", report)
         return metrics
 
     # helper:  update timer based progress
