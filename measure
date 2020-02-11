@@ -152,7 +152,7 @@ class Vegeta(Measure):
                     # Child process has exited, stop polling
                     break
             exit_code = self.proc.returncode
-            self.debug("Vegeta exited with status code:", status_code)
+            self.debug("Vegeta exited with exit code:", exit_code)
         except Exception as e:
             raise
         finally:
