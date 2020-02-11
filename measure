@@ -147,7 +147,7 @@ class Vegeta(Measure):
                     # TODO: Hack. Why can't I get this crap stripped?
                     json_string = stripped(report_output).replace('[2J[0;0H', '')
                     vegeta_report = json.loads(json_string)
-                    self._metrics_from_vegeta_report(vegeta_report)
+                    self.progress_message = "Vegeta latest metrics: %s" % self._metrics_from_vegeta_report(vegeta_report)
                 if self.proc.poll() is not None:
                     # Child process has exited, stop polling
                     break
