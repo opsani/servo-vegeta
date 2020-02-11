@@ -174,6 +174,8 @@ class Vegeta(Measure):
         return total_seconds
 
     def _metrics_from_vegeta_report(self, report):
+        if report is None:
+            return None                    
         metrics = METRICS.copy()
 
         # Capture latency values
