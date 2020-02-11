@@ -21,12 +21,6 @@ This package provides support for executing a constant rate load test within an 
 * [`keepalive`](https://github.com/tsenart/vegeta#-keepalive) - Specifies whether to reuse TCP connections between HTTP requests. Default: `true`.
 * [`insecure`](https://github.com/tsenart/vegeta#-insecure) - Specifies whether to ignore invalid server TLS certificates. Default: `false`.
 
-### Interactive Reporting
-
-The `servo-vegeta` driver can provide interactive reporting while the attack is underway. This provides real-time visibility into effective rates, attack duration, status code blend, and latencies which can be informative for monitoring a calibration or optimization underway.
-
-TBD: Does it make more sense to utilize the JSON reporting and send it back to Optune for logging on the OCO side, pumping it out into Servo logs, or both? There's also a trade-off here where redirecting the captured content for reporting at the end of a cycle can fill up the container with accumulated data. This can be mitigated using the Vegeta `max-body` configuration but impacts how latencies are calculated.
-
 ### Example Configuration
 
 ```yaml
