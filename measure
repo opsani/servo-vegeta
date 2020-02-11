@@ -90,7 +90,7 @@ class Vegeta(Measure):
         config.update(load)
         exit_code, command, report = self._run_vegeta(config)
 
-        metrics = self._metrics_from_vegeta_report(report)
+        metrics = self._metrics_from_vegeta_report(report) if report else {}
         annotations = {
             'command': command,
         }
