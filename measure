@@ -16,7 +16,7 @@ from threading import Timer
 
 DESCRIPTION = "Vegeta plugin for the Opsani Continuous Integration Engine"
 VERSION = "0.0.1"
-REPORTING_INTERVAL = 1
+REPORTING_INTERVAL = 15
 HAS_CANCEL = True
 
 DEFAULT_CONFIGURATION = {
