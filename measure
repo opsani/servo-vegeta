@@ -148,12 +148,14 @@ class Vegeta(Measure):
                     json_string = stripped(report_output).replace('[2J[0;0H', '')
                     vegeta_report = json.loads(json_string)
                     self.progress_message = "Vegeta latest metrics: %s" % self._metrics_from_vegeta_report(vegeta_report)
+                    self.print_progress()
                 if self.proc.poll() is not None:
                     # Child process has exited, stop polling
                     break
             exit_code = self.proc.returncode
             self.debug("Vegeta exited with exit code:", exit_code)
             self.progress_message = "Vegeta exited with exit code: %i" % exit_code
+            self.print_progress()
         except Exception as e:
             raise
         finally:
