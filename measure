@@ -153,6 +153,7 @@ class Vegeta(Measure):
                     break
             exit_code = self.proc.returncode
             self.debug("Vegeta exited with exit code:", exit_code)
+            self.progress_message = "Vegeta exited with exit code: %i" % exit_code
         except Exception as e:
             raise
         finally:
