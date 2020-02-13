@@ -1,5 +1,6 @@
 # Project-specific files
 measure.py
+vegeta_targets
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
