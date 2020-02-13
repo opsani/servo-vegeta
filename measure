@@ -194,8 +194,6 @@ class Vegeta(Measure):
         # Calculate error rate
         error_rate = 100 - (report['success'] * 100) # Fraction of success inverted into % of error
         metrics['error_rate']['value'] = error_rate
-
-        self.debug("Built metrics ", metrics, "\n\n from \n\n", report)
         return metrics
 
     # helper:  update timer based progress
