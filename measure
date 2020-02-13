@@ -131,7 +131,7 @@ class Vegeta(Measure):
         ]
         vegeta_cmd = ' '.join(vegeta_attack_args) + ' | ' + ' '.join(vegeta_report_args)
         self.debug("Running Vegeta: ", vegeta_cmd)
-        self.print_progress(f"Vegeta started (vegeta_cmd)")
+        self.print_progress(f"Vegeta started: {vegeta_cmd}")
         vegeta_attack_proc = subprocess.Popen(vegeta_attack_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Pipe the output from the attack process into the reporting process
