@@ -34,7 +34,7 @@ DEFAULT_CONFIGURATION = {
 
 METRICS = {
     'throughput': {
-        'unit': 'requests/second'
+        'unit': 'rpm'
     },
     'error_rate': {
         'unit': 'percent'
