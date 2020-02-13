@@ -79,6 +79,13 @@ class Vegeta(Measure):
         except:
             pass
         sys.exit(0)
+    
+    # Disable the progress timer by overloading the superclass
+    # The progress timer and Vegeta get caught in a race that can
+    # result in multiple progress updates getting written onto the
+    # same line of stdout, resulting in invalid JSON
+    def start_progress_timer(self):
+        pass
 
     # overwrites super
     def measure(self):
@@ -86,9 +93,6 @@ class Vegeta(Measure):
             config_from_file = yaml.load(f.read())['vegeta']
         vegeta_config = DEFAULT_CONFIGURATION.copy()
         vegeta_config.update(config_from_file)
-
-        # Disable the progress timer -- we'll directly call print_progress()
-        self.stop_progress_timer()
 
         # Run the load test
         exit_code, command, report = self._run_vegeta(vegeta_config)
