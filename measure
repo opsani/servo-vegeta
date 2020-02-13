@@ -190,7 +190,7 @@ class Vegeta(Measure):
         for latency_key in ['total', 'mean', '50th', '95th', '99th', 'max', 'min']:
             latency_value = report['latencies'].get(latency_key, None)
             # Convert Nanonsecond -> Millisecond
-            value = (latency_value * 0.000001) if latency_value is not None else None
+            value = (latency_value * 0.000001) if latency_value is not None else -1
             metrics['latency_' + latency_key]['value'] = value
 
         # Capture throughput
