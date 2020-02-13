@@ -122,8 +122,7 @@ class Vegeta(Measure):
         ]
         vegeta_cmd = ' '.join(vegeta_attack_args) + ' | ' + ' '.join(vegeta_report_args)
         self.debug("Running Vegeta: ", vegeta_cmd)
-        self.progress_message = "Vegeta started (%s)" % vegeta_cmd
-        self.print_progress()
+        self.print_progress(f"Vegeta started (vegeta_cmd)")
         vegeta_attack_proc = subprocess.Popen(vegeta_attack_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Pipe the output from the attack process into the reporting process
@@ -147,15 +146,13 @@ class Vegeta(Measure):
                     # TODO: Hack. Why can't I get this crap stripped?
                     json_string = stripped(report_output).replace('[2J[0;0H', '')
                     vegeta_report = json.loads(json_string)
-                    self.progress_message = "Vegeta latest metrics: %s" % self._metrics_from_vegeta_report(vegeta_report)
-                    self.print_progress()
+                    self.print_progress(f"Vegeta latest metrics: {self._metrics_from_vegeta_report(vegeta_report)}")
                 if self.proc.poll() is not None:
                     # Child process has exited, stop polling
                     break
             exit_code = self.proc.returncode
             self.debug("Vegeta exited with exit code:", exit_code)
-            self.progress_message = "Vegeta exited with exit code: %i" % exit_code
-            self.print_progress()
+            self.print_progress(f"Vegeta exited with exit code: {exit_code}")
         except Exception as e:
             raise
         finally:
