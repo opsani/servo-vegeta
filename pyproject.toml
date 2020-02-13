@@ -5,6 +5,12 @@ description = "Opsani Servo plugin for the Vegeta load testing tool."
 authors = ["Blake Watters <blake@opsani.com>"]
 license = "BSD-3-Clause"
 
+packages = [
+    { include = "measure" },
+    { include = "measure.py" },
+]
+include = ["README.md", "LICENSE"]
+
 [tool.poetry.dependencies]
 python = "^3.6"
 pyyaml = "^5.3"
