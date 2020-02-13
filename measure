@@ -78,7 +78,7 @@ class Vegeta(Measure):
             self.proc.terminate()
         except:
             pass
-        sys.exit(3)
+        sys.exit(0)
 
     # overwrites super
     def measure(self):
