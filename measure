@@ -195,7 +195,7 @@ class Vegeta(Measure):
             metrics['latency_' + latency_key]['value'] = value
 
         # Capture throughput
-        metrics['throughput']['value'] = report['throughput']
+        metrics['throughput']['value'] = report['throughput'] * 60
         
         # Calculate error rate
         error_rate = 100 - (report['success'] * 100) # Fraction of success inverted into % of error
