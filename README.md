@@ -84,5 +84,11 @@ Vegeta metrics example:
 
 ## Testing
 
+1. Create `vegeta_targets` file in either JSON or HTTP Vegeta target format.
+2. Create `config.yaml` file with load configuration.
+3. Install dependencies via [Poetry](https://github.com/python-poetry/poetry): `$ poetry install`
+4. Run the plugin standalone: `$ echo '{}' | poetry run ./measure any-string`
+
 ## License
 
+BSD 3-Clause. See `LICENSE` file.
