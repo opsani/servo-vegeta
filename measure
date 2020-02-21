@@ -118,10 +118,19 @@ class Vegeta(Measure):
         exit_code, command = self._run_vegeta(vegeta_config)
         self.print_progress(f"Producing time series metrics from {len(self.time_series_metrics)} measurements")
         metrics = self._time_series_metrics_from_vegeta_reports() if self.time_series_metrics else {}
+        number_of_urls = self._number_of_lines_in_file(vegeta_config['targets'])
+        summary = f"Loading {number_of_urls} URL(s) for {vegeta_config['duration']} (delay of {delay}, warmup of {warmup}) at a rate of {vegeta_config['rate']}"
         annotations = {
-            'command': command,
+            'load_profile': summary,
         }
         return metrics, annotations
+
+    def _number_of_lines_in_file(self, filename):
+        count = 0
+        with open(filename, 'r') as f:
+            for line in f:
+                count += 1
+        return count
 
     def _run_vegeta(self, config):
         prog_coefficient = 1.0
