@@ -111,7 +111,7 @@ class Vegeta(Measure):
         with open('./config.yaml') as f:
             config_from_file = yaml.load(f.read())['vegeta']
         vegeta_config = DEFAULT_CONFIGURATION.copy()
-        vegeta_config['duration'] = f'{duration}s'
+        vegeta_config['duration'] = f'{duration + warmup}s'
         vegeta_config.update(config_from_file)
 
         # Run the load test
