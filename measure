@@ -97,8 +97,7 @@ class Vegeta(Measure):
     # overwrites super
     def measure(self):
         control = self.input_data.get('control', {})
-        warmup = int(control.get('warmup', DEFAULT_WARMUP))
-        self.warmup_until_timestamp = datetime.now() + timedelta(seconds=warmup)
+        warmup = int(control.get('warmup', DEFAULT_WARMUP))        
         delay = int(control.get('delay', DEFAULT_DELAY))        
 
         # Handle delay (if any)
@@ -106,6 +105,7 @@ class Vegeta(Measure):
             self.progress = 0
             self.print_progress(f'DELAY: sleeping {delay} seconds')
             time.sleep(delay)
+        self.warmup_until_timestamp = datetime.now() + timedelta(seconds=warmup)
 
         with open('./config.yaml') as f:
             config_from_file = yaml.load(f.read())['vegeta']
