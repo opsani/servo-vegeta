@@ -187,7 +187,6 @@ class Vegeta(Measure):
                     metrics = self._metrics_from_vegeta_report(vegeta_report)
                     if datetime.now() > self.warmup_until_timestamp:
                         timestamp = int(time.time())
-                        self.warmup_until_timestamp
                         self.time_series_metrics[timestamp] = metrics
                         self.print_progress(f"Vegeta metrics aggregated: {metrics}")
                     else:
