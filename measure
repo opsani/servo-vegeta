@@ -205,7 +205,9 @@ class Vegeta(Measure):
 
     # Parses a Golang duration string into seconds
     def _seconds_from_duration_str(self, duration_value):
-        if duration_value.strip() == '0':
+        if isinstance(duration_value, (int, float)):
+            return int(duration_value)
+        elif duration_value.strip() == '0':
             return 0
         hours, minutes, seconds = 0, 0, 0
         for component in re.findall('\d+[hms]', duration_value):
