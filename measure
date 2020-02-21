@@ -23,7 +23,6 @@ HAS_CANCEL = True
 
 DEFAULT_CONFIGURATION = {
     'rate': '500',
-    'duration': '0',
     'targets': 'vegeta_targets',
     'format': 'http',
     'connections': '10000',
@@ -33,6 +32,7 @@ DEFAULT_CONFIGURATION = {
     'keepalive': 'true',
     'insecure': 'false',
 }
+DEFAULT_DURATION = 120
 DEFAULT_WARMUP = 0
 DEFAULT_DELAY = 0
 
@@ -97,9 +97,10 @@ class Vegeta(Measure):
     # overwrites super
     def measure(self):
         control = self.input_data.get('control', {})
+        duration = int(control.get('duration', DEFAULT_DURATION))
         warmup = int(control.get('warmup', DEFAULT_WARMUP))
         self.warmup_until_timestamp = datetime.now() + timedelta(seconds=warmup)
-        delay = int(control.get('delay', DEFAULT_DELAY))        
+        delay = int(control.get('delay', DEFAULT_DELAY))
 
         # Handle delay (if any)
         if delay > 0:
@@ -110,6 +111,7 @@ class Vegeta(Measure):
         with open('./config.yaml') as f:
             config_from_file = yaml.load(f.read())['vegeta']
         vegeta_config = DEFAULT_CONFIGURATION.copy()
+        vegeta_config['duration'] = f'{duration}s'
         vegeta_config.update(config_from_file)
 
         # Run the load test
