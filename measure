@@ -31,6 +31,7 @@ DEFAULT_CONFIGURATION = {
     'http2': 'true',
     'keepalive': 'true',
     'insecure': 'false',
+    'max-body': '-1'
 }
 DEFAULT_DURATION = 120
 DEFAULT_WARMUP = 0
@@ -150,7 +151,8 @@ class Vegeta(Measure):
             '-max-workers', str(config['max-workers']),
             '-http2', config['http2'],
             '-keepalive', config['keepalive'],
-            '-insecure', config['insecure']
+            '-insecure', config['insecure'],
+            '-max-body', str(config['max-body']),
         ]
 
         vegeta_report_args = [

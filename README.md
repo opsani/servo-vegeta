@@ -17,6 +17,7 @@ This package provides support for executing a constant rate load test within an 
 * [`connections`](https://github.com/tsenart/vegeta#-connections) - Specifies the maximum number of idle open connections per target host. Default: `10000`.
 * [`workers`](https://github.com/tsenart/vegeta#-workers) - Specifies the initial number of workers used in the attack. The workers will automatically increase to achieve the target request rate, up to `max-workers`. Default: `10`.
 * [`max-workers`](https://github.com/tsenart/vegeta#-max-workers) - The maximum number of workers used to sustain the attack. This can be used to control the concurrency of the attack to simulate a target number of clients. Default: `18446744073709551615`.
+* [`max-body`](https://github.com/tsenart/vegeta/blob/master/README.md#-max-body) - Specifies the maximum number of bytes to capture from the body of each response. Remaining unread bytes will be fully read but discarded. Default: `-1`.
 * [`http2`](https://github.com/tsenart/vegeta#-http2) - Specifies whether to enable HTTP/2 requests to servers which support it. Default: `true`.
 * [`keepalive`](https://github.com/tsenart/vegeta#-keepalive) - Specifies whether to reuse TCP connections between HTTP requests. Default: `true`.
 * [`insecure`](https://github.com/tsenart/vegeta#-insecure) - Specifies whether to ignore invalid server TLS certificates. Default: `false`.
