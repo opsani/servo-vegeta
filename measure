@@ -191,14 +191,10 @@ class Vegeta(Measure):
 
         # loop and poll our process pipe to gather report data        
         try:
-            stripped = lambda s: "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
             while True:
-                output = self.proc.stdout.readline()                
+                output = self.proc.stdout.readline()
                 if output:
-                    report_output = output.decode().strip()
-                    # TODO: Hack. Why can't I get this crap stripped?
-                    json_string = stripped(report_output).replace('[2J[0;0H', '')
-                    vegeta_report = json.loads(json_string)
+                    vegeta_report = json.loads(output)
                     metrics = self._metrics_from_vegeta_report(vegeta_report)
                     if datetime.now() > self.warmup_until_timestamp:
                         timestamp = int(time.time())
