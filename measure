@@ -116,9 +116,11 @@ class Vegeta(Measure):
         vegeta_config['duration'] = f'{duration + warmup}s'
         vegeta_config.update(config_from_file)
 
-        # Verify that we have a target or targets
+        # Verify that we have a sane target environment
         if vegeta_config['target'] == None and vegeta_config['targets'] == None:
             raise KeyError("A `target` or `targets` option must be configured")
+        if vegeta_config['target'] == None and vegeta_config['targets'] == 'stdin':
+            raise KeyError("A `target` option must be configured when `targets` is set to 'stdin'")
 
         # Run the load test
         number_of_urls = 1 if vegeta_config['target'] else self._number_of_lines_in_file(vegeta_config['targets'])
