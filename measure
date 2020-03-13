@@ -121,6 +121,8 @@ class Vegeta(Measure):
             raise KeyError("A `target` or `targets` option must be configured")
         if vegeta_config['target'] == None and vegeta_config['targets'] == 'stdin':
             raise KeyError("A `target` option must be configured when `targets` is set to 'stdin'")
+        if vegeta_config['target'] != None and vegeta_config['targets'] != 'stdin':
+            raise KeyError("When a `target` option is configured the `targets` must be set to 'stdin'")
 
         # Run the load test
         number_of_urls = 1 if vegeta_config['target'] else self._number_of_lines_in_file(vegeta_config['targets'])
