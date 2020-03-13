@@ -199,8 +199,6 @@ class Vegeta(Measure):
             exit_code = self.proc.returncode
             self.debug("Vegeta exited with exit code:", exit_code)
             self.print_progress(f"Vegeta exited with exit code: {exit_code}")
-        except Exception as e:
-            raise
         finally:
             timer.cancel()
         return exit_code, vegeta_cmd
