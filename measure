@@ -121,11 +121,12 @@ class Vegeta(Measure):
             raise KeyError("A `target` or `targets` option must be configured")
 
         # Run the load test
-        exit_code, command = self._run_vegeta(vegeta_config)
-        self.print_progress(f"Producing time series metrics from {len(self.time_series_metrics)} measurements")
-        metrics = self._time_series_metrics_from_vegeta_reports() if self.time_series_metrics else {}
         number_of_urls = 1 if vegeta_config['target'] else self._number_of_lines_in_file(vegeta_config['targets'])
         summary = f"Loading {number_of_urls} URL(s) for {vegeta_config['duration']} (delay of {delay}, warmup of {warmup}) at a rate of {vegeta_config['rate']}"
+        self.print_progress(summary)
+        exit_code, command = self._run_vegeta(vegeta_config)
+        self.print_progress(f"Producing time series metrics from {len(self.time_series_metrics)} measurements")
+        metrics = self._time_series_metrics_from_vegeta_reports() if self.time_series_metrics else {}        
         annotations = {
             'load_profile': summary,
         }
