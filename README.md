@@ -12,7 +12,8 @@ This package provides support for executing a constant rate load test within an 
 
 * [**`rate`**](https://github.com/tsenart/vegeta#-rate) - Specifies the request rate per time unit to issue against the targets. Given in the format of `request/time unit`. Examples: `50/1s`, `3000/1m`. A value of `0` will cause requests to be issued as fast as possible.
 * [**`duration`**](https://github.com/tsenart/vegeta#-duration) - Specifies the amount of time to issue requests to the targets. Examples: `30s`, `10m`.
-* [`targets`](https://github.com/tsenart/vegeta#-targets) - Specifies the file from which to read targets. See the `format` option to learn about available target formats. Default: `vegeta_targets`.
+* **`target`** - Specifies a single formatted Vegeta target to load against. This option is exclusive of the `target` option and will provide a target Vegeta via stdin. Default: `None`. Example: `GET https://localhost:8080/`
+* [**`targets`**](https://github.com/tsenart/vegeta#-targets) - Specifies the file from which to read targets. See the `format` option to learn about available target formats. This option is exclusive of the `target` option and one or the other must be provided. Default: `stdin`. This file must be mapped into the Servo assembly container.
 * [`format`](https://github.com/tsenart/vegeta#-format) - Specifies the format of the `targets` input. Valid values are `http` and `json`. Refer to the Vegeta docs for details. Default: `http`.
 * [`connections`](https://github.com/tsenart/vegeta#-connections) - Specifies the maximum number of idle open connections per target host. Default: `10000`.
 * [`workers`](https://github.com/tsenart/vegeta#-workers) - Specifies the initial number of workers used in the attack. The workers will automatically increase to achieve the target request rate, up to `max-workers`. Default: `10`.
@@ -28,7 +29,7 @@ This package provides support for executing a constant rate load test within an 
 vegeta:
     rate: 3000/m
     duration: 10m
-    format: json
+    target: GET https://localhost:8080/
     workers: 500
     max-workers: 5000
     interactive: true
@@ -85,10 +86,9 @@ Vegeta metrics example:
 
 ## Testing
 
-1. Create `vegeta_targets` file in either JSON or HTTP Vegeta target format.
-2. Create `config.yaml` file with load configuration.
-3. Install dependencies via [Poetry](https://github.com/python-poetry/poetry): `$ poetry install`
-4. Run the plugin standalone: `$ echo '{}' | poetry run ./measure any-string`
+1. Create `config.yaml` file with load configuration and `target`.
+2. Install dependencies via [Poetry](https://github.com/python-poetry/poetry): `$ poetry install`
+3. Run the plugin standalone: `$ echo '{}' | poetry run ./measure any-string`
 
 ## License
 
