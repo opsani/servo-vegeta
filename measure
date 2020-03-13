@@ -17,8 +17,8 @@ from threading import Timer
 from datetime import datetime, timedelta 
 
 DESCRIPTION = "Vegeta plugin for the Opsani Continuous Integration Engine"
-VERSION = "0.0.1"
 REPORTING_INTERVAL = 15
+VERSION = "1.0.0"
 HAS_CANCEL = True
 
 DEFAULT_CONFIGURATION = {
