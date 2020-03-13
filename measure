@@ -110,7 +110,7 @@ class Vegeta(Measure):
         self.warmup_until_timestamp = datetime.now() + timedelta(seconds=warmup)
 
         with open('./config.yaml') as f:
-            config_from_file = yaml.load(f.read())['vegeta']
+            config_from_file = yaml.load(f.read(), Loader=yaml.FullLoader)['vegeta']
         vegeta_config = DEFAULT_CONFIGURATION.copy()
         vegeta_config['duration'] = f'{duration + warmup}s'
         vegeta_config.update(config_from_file)
