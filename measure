@@ -134,6 +134,7 @@ class Vegeta(Measure):
         annotations = {
             'load_profile': summary,
         }
+        self.print_progress(f"Reporting time series metrics {metrics} and annotations {annotations}")
         return metrics, annotations
 
     def _number_of_lines_in_file(self, filename):
