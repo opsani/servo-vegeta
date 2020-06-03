@@ -42,6 +42,9 @@ METRICS = {
     'throughput': {
         'unit': 'rpm'
     },
+    'requests': {
+        'unit': 'count'
+    },
     'error_rate': {
         'unit': 'percent'
     },
@@ -252,7 +255,8 @@ class Vegeta(Measure):
             value = (latency_value * 0.000001) if latency_value is not None else -1
             metrics['latency_' + latency_key]['value'] = value
 
-        # Capture throughput
+        # Capture top level metrics
+        metrics['requests']['value'] = report['requests']
         metrics['throughput']['value'] = report['throughput'] * 60
         
         # Calculate error rate
